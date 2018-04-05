@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Lmyc.Data;
 using Lmyc.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace Lmyc.Controllers
 {
@@ -22,8 +24,7 @@ namespace Lmyc.Controllers
         // GET: Boats
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Boats.Include(b => b.User);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _context.Boats.ToListAsync());
         }
 
         // GET: Boats/Details/5
@@ -35,7 +36,6 @@ namespace Lmyc.Controllers
             }
 
             var boat = await _context.Boats
-                .Include(b => b.User)
                 .SingleOrDefaultAsync(m => m.BoatId == id);
             if (boat == null)
             {
@@ -48,7 +48,6 @@ namespace Lmyc.Controllers
         // GET: Boats/Create
         public IActionResult Create()
         {
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
@@ -57,15 +56,29 @@ namespace Lmyc.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BoatId,BoatName,BoatStatus,BoatPicture,BoatDescription,BoatLength,BoatMake,BoatYear,CreditsPerHourOfUsage,CreatedBy")] Boat boat)
+        public async Task<IActionResult> Create([Bind("BoatId,BoatName,BoatStatus,BoatPicture,BoatDescription,BoatLength,BoatMake,BoatYear,CreditsPerHourOfUsage")] Boat boat, IFormFile Image)
         {
             if (ModelState.IsValid)
             {
+                if (Image != null)
+                {
+                    if (Image.Length > 0)
+                    //Convert Image to byte and save to database
+                    {
+                        byte[] imageBytes = null;
+                        using (var fs = Image.OpenReadStream())
+                        using (var ms = new MemoryStream())
+                        {
+                            fs.CopyTo(ms);
+                            imageBytes = ms.ToArray();
+                        }
+                        boat.BoatPicture = imageBytes;
+                    }
+                }
                 _context.Add(boat);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "Id", boat.CreatedBy);
             return View(boat);
         }
 
@@ -82,7 +95,6 @@ namespace Lmyc.Controllers
             {
                 return NotFound();
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "Id", boat.CreatedBy);
             return View(boat);
         }
 
@@ -91,7 +103,7 @@ namespace Lmyc.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("BoatId,BoatName,BoatStatus,BoatPicture,BoatDescription,BoatLength,BoatMake,BoatYear,CreditsPerHourOfUsage,CreatedBy")] Boat boat)
+        public async Task<IActionResult> Edit(string id, [Bind("BoatId,BoatName,BoatStatus,BoatPicture,BoatDescription,BoatLength,BoatMake,BoatYear,CreditsPerHourOfUsage")] Boat boat, IFormFile Image)
         {
             if (id != boat.BoatId)
             {
@@ -100,6 +112,21 @@ namespace Lmyc.Controllers
 
             if (ModelState.IsValid)
             {
+                if (Image != null)
+                {
+                    if (Image.Length > 0)
+                    //Convert Image to byte and save to database
+                    {
+                        byte[] imageBytes = null;
+                        using (var fs = Image.OpenReadStream())
+                        using (var ms = new MemoryStream())
+                        {
+                            fs.CopyTo(ms);
+                            imageBytes = ms.ToArray();
+                        }
+                        boat.BoatPicture = imageBytes;
+                    }
+                }
                 try
                 {
                     _context.Update(boat);
@@ -118,7 +145,6 @@ namespace Lmyc.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "Id", boat.CreatedBy);
             return View(boat);
         }
 
@@ -131,7 +157,6 @@ namespace Lmyc.Controllers
             }
 
             var boat = await _context.Boats
-                .Include(b => b.User)
                 .SingleOrDefaultAsync(m => m.BoatId == id);
             if (boat == null)
             {
