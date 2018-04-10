@@ -14,6 +14,7 @@ using Lmyc.Services;
 using Swashbuckle.AspNetCore.Swagger;
 using System.IO;
 using AspNet.Security.OpenIdConnect.Primitives;
+using Lmyc.Policies;
 
 namespace Lmyc
 {
@@ -31,26 +32,42 @@ namespace Lmyc
         {
             services.AddMvc();
 
+            services.AddCors();
+
+            // Online test database
             //services.AddDbContext<ApplicationDbContext>(options =>
             //{
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("Lmyc"));
+            //    options.UseSqlServer(Configuration.GetConnectionString("DevelopmentConnection"));
 
             //    // Register the entity sets needed by OpenIddict.
             //    // Note: use the generic overload if you need
             //    // to replace the default OpenIddict entities.
             //    options.UseOpenIddict();
             //});
-          
-            var host = Configuration["DBHOST"] ?? "localhost";
-            var port = Configuration["DBPORT"] ?? "3306";
-            var password = Configuration["DBPASSWORD"] ?? "secret";
 
+            // Local Database
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseMySql($"server={host}; userid=root; pwd={password};"
-                    + $"port={port}; database=lmyc");
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("Lmyc"));
+
+                // Register the entity sets needed by OpenIddict.
+                // Note: use the generic overload if you need
+                // to replace the default OpenIddict entities.
                 options.UseOpenIddict();
             });
+
+
+            // Docker Database
+            //var host = Configuration["DBHOST"] ?? "localhost";
+            //var port = Configuration["DBPORT"] ?? "3306";
+            //var password = Configuration["DBPASSWORD"] ?? "secret";
+
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //{
+            //    options.UseMySql($"server={host}; userid=root; pwd={password};"
+            //        + $"port={port}; database=lmyc");
+            //    options.UseOpenIddict();
+            //});
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -108,6 +125,14 @@ namespace Lmyc
                 var xmlPath = Path.Combine(basePath, "LmycApi.xml");
                 c.IncludeXmlComments(xmlPath);
             });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(PolicyName.RequireLogin, policy => policy.RequireAuthenticatedUser());
+                options.AddPolicy(PolicyName.BookingRequirement, 
+                    policy => policy.RequireRole(Role.Admin, Role.AssociateMember, Role.BookingModerator, Role.Crew, Role.CruiseSkipper, Role.DaySkipper, Role.MemberGoodStanding));
+                options.AddPolicy(PolicyName.RequireAdmin, policy => policy.RequireRole(Role.Admin));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -126,10 +151,9 @@ namespace Lmyc
 
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
-            //context.Database.EnsureDeleted();
-            context.Database.Migrate();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
@@ -146,8 +170,6 @@ namespace Lmyc
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "LMYC API V1.0");
             });
-
-            app.UseMvc();
         }
     }
 }

@@ -1,7 +1,75 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-##Team member: Castiel Li (CL) , Jason Chen (JC) , Harrison Milbradt (HM) , Mu Chen (Paul) Li (ML)
+##Team member: Castiel Li (CL) , Jason Chen (JC) , Harrison Milbradt (HM) , Mu Chen (Paul) Li (ML), Nate Chiang (NC)
+
+## [0.2.5]
+### 2018-04-09
+#### Added
+* Add booking policy - JC
+* Add login policy - JC
+* Add Admin policy - JC
+* Add member status to role - JC
+* Add skipper status to role - JC
+
+#### Removed
+* Delete Member status - JC
+* Delete Skipper status - JC
+
+## [0.2.4]
+### 2018-04-09
+#### Changed
+* Edited the reservation model as we dont need AllocatedCredits - NC
+* Created view models for Reservations - NC
+
+### 2018-04-05
+#### Changed
+* Clean up migrations - JC
+* Fix boat model - JC
+* Fix reservation model - JC
+* Fix reservation mvc - JC
+
+## [0.2.3]
+### 2018-04-02
+#### Changed
+* Fix boat seeding data - JC
+* Delete old tests - JC
+
+## [0.2.2]
+### 2018-03-31
+#### Added
+* Add user roles - JC
+* Modify user model - JC
+* fix user controller - JC
+
+## [0.2.1]
+### 2018-03-31
+#### Added
+* VolunteerAPI controller - CL
+* VolunteerMVC controller - CL
+* VolunteerModel controller - CL
+* Added Test project - CL     
+* Create one test case - CL
+
+#### Changed
+* Fixed Castiel's mistake as he mistakenly dragged and dropped the entire model folder inside the DataLib library even thought there are no references inside the DataLib project - NC
+
+## [0.2.0]
+### 2018-03-26
+#### Added
+* Add online test database connection string - JC
+
+#### Changed
+* Modify reservation model - JC
+* re-migrate reservation model - JC
+
+## [0.1.4]
+### 2018-03-24
+#### Changed
+* updated program.cs (run the seed method when program starts) - CL
+#### Added
+* BoatDummyData.cs - CL
+* DbInitializer.cs - CL
 
 ## [0.1.3]
 ### 2018-03-22

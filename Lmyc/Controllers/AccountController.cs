@@ -16,7 +16,7 @@ using Lmyc.Services;
 
 namespace Lmyc.Controllers
 {
-    [Authorize]
+    
     [Route("[controller]/[action]")]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
@@ -229,12 +229,14 @@ namespace Lmyc.Controllers
                     Email = model.Email,
                     Street = model.Street,
                     City = model.City,
+                    Province = model.Province,
                     Country = model.Country,
                     PostalCode = model.PostalCode,
                     SailingExperience = model.SailingExperience,
                     Skills = model.Skills,
                     SailingQualifications = model.SailingQualifications,
-                    EmergencyContactOnePhone = model.EmergencyContactOnePhone
+                    EmergencyContactOne = model.EmergencyContactOne,
+                    StartingCredit = 320
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
