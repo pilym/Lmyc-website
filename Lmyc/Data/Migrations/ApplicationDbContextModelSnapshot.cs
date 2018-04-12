@@ -86,8 +86,6 @@ namespace Lmyc.Data.Migrations
                     b.Property<string>("Province")
                         .IsRequired();
 
-                    b.Property<int?>("ReservationId");
-
                     b.Property<int>("SailingExperience");
 
                     b.Property<string>("SailingQualifications")
@@ -122,8 +120,6 @@ namespace Lmyc.Data.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("ReservationId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -161,39 +157,72 @@ namespace Lmyc.Data.Migrations
                     b.ToTable("Boats");
                 });
 
-            modelBuilder.Entity("Lmyc.Models.Reservation", b =>
+            modelBuilder.Entity("Lmyc.Models.Booking", b =>
                 {
-                    b.Property<int>("ReservationId")
+                    b.Property<int>("BookingId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double>("AllocatedHours");
+                    b.Property<int>("AllocatedHours");
 
                     b.Property<int>("BoatId");
-
-                    b.Property<string>("CreatedBy");
 
                     b.Property<DateTime>("EndDateTime");
 
                     b.Property<string>("Itinerary")
                         .HasMaxLength(1024);
 
-                    b.Property<string>("NonMemberCrew")
+                    b.Property<string>("NonMemberCrews")
                         .IsRequired();
 
                     b.Property<DateTime>("StartDateTime");
 
-                    b.HasKey("ReservationId");
+                    b.Property<string>("UserId");
+
+                    b.HasKey("BookingId");
 
                     b.HasIndex("BoatId");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("Lmyc.Models.Document", b =>
+                {
+                    b.Property<int>("DocumentId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("DocumentName");
+
+                    b.Property<string>("Path");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("DocumentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Document");
+                });
+
+            modelBuilder.Entity("Lmyc.Models.UserBooking", b =>
+                {
+                    b.Property<string>("UserId");
+
+                    b.Property<int>("BookingId");
+
+                    b.Property<int>("UsedCredit");
+
+                    b.HasKey("UserId", "BookingId");
+
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("UserBooking");
                 });
 
             modelBuilder.Entity("Lmyc.Models.Volunteer", b =>
                 {
-                    b.Property<int>("VoluntterId")
+                    b.Property<int>("VolunteerId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("ClassificationCodes");
@@ -201,17 +230,18 @@ namespace Lmyc.Data.Migrations
                     b.Property<DateTime>("Date");
 
                     b.Property<string>("Description")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasMaxLength(2048);
 
                     b.Property<int>("Duration");
 
-                    b.Property<string>("Id");
+                    b.Property<string>("UserId");
 
-                    b.HasKey("VoluntterId");
+                    b.HasKey("VolunteerId");
 
-                    b.HasIndex("Id");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Volunteer");
+                    b.ToTable("Volunteers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -458,14 +488,7 @@ namespace Lmyc.Data.Migrations
                     b.ToTable("OpenIddictTokens");
                 });
 
-            modelBuilder.Entity("Lmyc.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("Lmyc.Models.Reservation")
-                        .WithMany("MemberCrew")
-                        .HasForeignKey("ReservationId");
-                });
-
-            modelBuilder.Entity("Lmyc.Models.Reservation", b =>
+            modelBuilder.Entity("Lmyc.Models.Booking", b =>
                 {
                     b.HasOne("Lmyc.Models.Boat", "Boat")
                         .WithMany()
@@ -474,14 +497,34 @@ namespace Lmyc.Data.Migrations
 
                     b.HasOne("Lmyc.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("CreatedBy");
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Lmyc.Models.Document", b =>
+                {
+                    b.HasOne("Lmyc.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Lmyc.Models.UserBooking", b =>
+                {
+                    b.HasOne("Lmyc.Models.Booking", "Booking")
+                        .WithMany("UserBookings")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Lmyc.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Lmyc.Models.Volunteer", b =>
                 {
                     b.HasOne("Lmyc.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("Id");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

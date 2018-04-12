@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Lmyc.Data;
 using Lmyc.Models;
 
-namespace Lmyc.Controllers
+namespace Lmyc.Controllers.API
 {
     [Produces("application/json")]
-    [Route("api/Volunteers")]
+    [Route("api/VolunteersAPI")]
     public class VolunteersAPIController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,9 +23,9 @@ namespace Lmyc.Controllers
 
         // GET: api/Volunteers
         [HttpGet]
-        public IEnumerable<Volunteer> GetVolunteer()
+        public IEnumerable<Volunteer> GetVolunteers()
         {
-            return _context.Volunteer;
+            return _context.Volunteers;
         }
 
         // GET: api/Volunteers/5
@@ -37,7 +37,7 @@ namespace Lmyc.Controllers
                 return BadRequest(ModelState);
             }
 
-            var volunteer = await _context.Volunteer.SingleOrDefaultAsync(m => m.VoluntterId == id);
+            var volunteer = await _context.Volunteers.SingleOrDefaultAsync(m => m.VolunteerId == id);
 
             if (volunteer == null)
             {
@@ -56,7 +56,7 @@ namespace Lmyc.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != volunteer.VoluntterId)
+            if (id != volunteer.VolunteerId)
             {
                 return BadRequest();
             }
@@ -91,10 +91,10 @@ namespace Lmyc.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Volunteer.Add(volunteer);
+            _context.Volunteers.Add(volunteer);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVolunteer", new { id = volunteer.VoluntterId }, volunteer);
+            return CreatedAtAction("GetVolunteer", new { id = volunteer.VolunteerId }, volunteer);
         }
 
         // DELETE: api/Volunteers/5
@@ -106,13 +106,13 @@ namespace Lmyc.Controllers
                 return BadRequest(ModelState);
             }
 
-            var volunteer = await _context.Volunteer.SingleOrDefaultAsync(m => m.VoluntterId == id);
+            var volunteer = await _context.Volunteers.SingleOrDefaultAsync(m => m.VolunteerId == id);
             if (volunteer == null)
             {
                 return NotFound();
             }
 
-            _context.Volunteer.Remove(volunteer);
+            _context.Volunteers.Remove(volunteer);
             await _context.SaveChangesAsync();
 
             return Ok(volunteer);
@@ -120,7 +120,7 @@ namespace Lmyc.Controllers
 
         private bool VolunteerExists(int id)
         {
-            return _context.Volunteer.Any(e => e.VoluntterId == id);
+            return _context.Volunteers.Any(e => e.VolunteerId == id);
         }
     }
 }

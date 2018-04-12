@@ -15,6 +15,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System.IO;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Lmyc.Policies;
+using Microsoft.Extensions.FileProviders;
 
 namespace Lmyc
 {
@@ -30,25 +31,22 @@ namespace Lmyc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddSingleton<IFileProvider>(
+                new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/documents")));
+
             services.AddMvc();
 
             services.AddCors();
 
-            // Online test database
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //{
-            //    options.UseSqlServer(Configuration.GetConnectionString("DevelopmentConnection"));
-
-            //    // Register the entity sets needed by OpenIddict.
-            //    // Note: use the generic overload if you need
-            //    // to replace the default OpenIddict entities.
-            //    options.UseOpenIddict();
-            //});
-
             // Local Database
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("Lmyc"));
+                // local db
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                // online db
+                //options.UseSqlServer(Configuration.GetConnectionString("DevelopmentConnection"));
 
                 // Register the entity sets needed by OpenIddict.
                 // Note: use the generic overload if you need
@@ -136,7 +134,7 @@ namespace Lmyc
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -154,6 +152,8 @@ namespace Lmyc
             app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseAuthentication();
+
+            app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseMvc(routes =>
             {

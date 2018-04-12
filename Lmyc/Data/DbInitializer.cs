@@ -1,4 +1,5 @@
-﻿using Lmyc.Models;
+﻿using Lmyc.Helper;
+using Lmyc.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebSockets.Internal;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,8 @@ namespace Lmyc.Data
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                string[] roleNames = { "Admin", "Member(A)", "Member(B)", "Associate Member", "Booking Moderator", "Crew", "Day Skipper", "Cruise Skipper" };
+                string[] roleNames = 
+                    { Role.Admin, Role.MemberGoodStanding, Role.MemberNotGoodStanding, Role.AssociateMember, Role.BookingModerator, Role.Crew, Role.DaySkipper, Role.CruiseSkipper };
 
                 foreach (var roleName in roleNames)
                 {
@@ -40,12 +42,25 @@ namespace Lmyc.Data
                     Skills = "none",
                     SailingQualifications = "none",
                     SailingExperience = 50,
-                    StartingCredit = 320
+                    StartingCredit = 320,
+                    CreditBalance = 320
                 };
 
 
                 var adminId = await EnsureUser(serviceProvider, admin, "P@$$w0rd");
-                await EnsureRole(serviceProvider, adminId, "Admin");
+                await EnsureRole(serviceProvider, adminId, Role.Admin);
+                await EnsureRole(serviceProvider, adminId, Role.CruiseSkipper);
+                await EnsureRole(serviceProvider, adminId, Role.DaySkipper);
+                await EnsureRole(serviceProvider, adminId, Role.MemberGoodStanding);
+
+                var users = GetApplicationUsers();
+                foreach (var user in users)
+                {
+                    var userId = await EnsureUser(serviceProvider, user, "P@$$w0rd");
+                    await EnsureRole(serviceProvider, userId, Role.MemberGoodStanding);
+                    await EnsureRole(serviceProvider, userId, Role.CruiseSkipper);
+                    await EnsureRole(serviceProvider, userId, Role.DaySkipper);
+                }
 
                 // Look for any boats in the database
                 if (context.Boats.Any())
@@ -59,7 +74,21 @@ namespace Lmyc.Data
                     context.Boats.Add(b);
                 }
 
+                if (context.Bookings.Any())
+                {
+                    return; // DB have been seeded
+                }
+
                 context.SaveChanges();
+
+                //var bookings = GetBookings(context);
+
+                //foreach (Booking b in bookings)
+                //{
+                //    context.Bookings.Add(b);
+                //}
+
+                //context.SaveChanges();
             }
                 
         }
@@ -86,6 +115,8 @@ namespace Lmyc.Data
                     SailingExperience = newUser.SailingExperience,
                     Skills = newUser.Skills,
                     SailingQualifications = newUser.SailingQualifications,
+                    StartingCredit = newUser.StartingCredit,
+                    CreditBalance = newUser.CreditBalance,
                     EmergencyContactOne = newUser.EmergencyContactOne
                 };
 
@@ -115,6 +146,91 @@ namespace Lmyc.Data
             }
 
             return identityResult;
+        }
+
+        private static List<ApplicationUser> GetApplicationUsers()
+        {
+            List<ApplicationUser> users = new List<ApplicationUser>
+            {
+                new ApplicationUser
+                {
+                    UserName = "castiel@bcit.ca",
+                    Email = "castiel@bcit.ca",
+                    FirstName = "Castiel",
+                    LastName = "Li",
+                    Street = "3700 Willingdon Ave",
+                    City = "Burnaby",
+                    Province = "BC",
+                    PostalCode = "V5G 3H2",
+                    Country = "Canada",
+                    HomePhone = "(604) 434-5734",
+                    EmergencyContactOne = "(604) 434-5734",
+                    Skills = "none",
+                    SailingQualifications = "none",
+                    SailingExperience = 2,
+                    StartingCredit = 320,
+                    CreditBalance = 320
+                },
+                new ApplicationUser
+                {
+                    UserName = "bryan@bcit.ca",
+                    Email = "bryan@bcit.ca",
+                    FirstName = "Bryan",
+                    LastName = "Brotonel",
+                    Street = "3700 Willingdon Ave",
+                    City = "Burnaby",
+                    Province = "BC",
+                    PostalCode = "V5G 3H2",
+                    Country = "Canada",
+                    HomePhone = "(604) 434-5734",
+                    EmergencyContactOne = "(604) 434-5734",
+                    Skills = "none",
+                    SailingQualifications = "none",
+                    SailingExperience = 1,
+                    StartingCredit = 320,
+                    CreditBalance = 320
+                },
+                new ApplicationUser
+                {
+                    UserName = "nate@bcit.ca",
+                    Email = "nate@bcit.ca",
+                    FirstName = "Nate",
+                    LastName = "Chiang",
+                    Street = "3700 Willingdon Ave",
+                    City = "Burnaby",
+                    Province = "BC",
+                    PostalCode = "V5G 3H2",
+                    Country = "Canada",
+                    HomePhone = "(604) 434-5734",
+                    EmergencyContactOne = "(604) 434-5734",
+                    Skills = "none",
+                    SailingQualifications = "none",
+                    SailingExperience = 5,
+                    StartingCredit = 320,
+                    CreditBalance = 320
+                },
+                new ApplicationUser
+                {
+                    UserName = "jason@bcit.ca",
+                    Email = "jason@bcit.ca",
+                    FirstName = "Jason",
+                    LastName = "Chen",
+                    Street = "3700 Willingdon Ave",
+                    City = "Burnaby",
+                    Province = "BC",
+                    PostalCode = "V5G 3H2",
+                    Country = "Canada",
+                    HomePhone = "(604) 434-5734",
+                    EmergencyContactOne = "(604) 434-5734",
+                    Skills = "none",
+                    SailingQualifications = "none",
+                    SailingExperience = 3,
+                    StartingCredit = 320,
+                    CreditBalance = 320
+                }
+            };
+
+            return users;
         }
 
         private static List<Boat> GetBoats()
@@ -221,5 +337,35 @@ namespace Lmyc.Data
 
             return boats;
         }
+
+        //private static List<Booking> GetBookings(ApplicationDbContext context)
+        //{
+        //    List<Booking> bookings = new List<Booking>();
+        //    var booking1 = new Booking
+        //    {
+        //        StartDateTime = DateTime.Now.AddDays(7),
+        //        EndDateTime = DateTime.Now.AddDays(9),
+        //        NonMemberCrews = "Medhat",
+        //        Itinerary = "Find titanic",
+        //        UserId = context.Users.FirstOrDefault(u => u.UserName == "castiel").Id,
+        //        BoatId = context.Boats.FirstOrDefault(b => b.BoatId == 1).BoatId
+        //    };
+
+        //    booking1.AllocatedHours = AllocatedHoursCalculator.CalculateAllocatedHours(booking1.StartDateTime, booking1.EndDateTime);
+        //    var userBookings = new List<UserBooking>
+        //    {
+        //        new UserBooking
+        //        {
+        //            UserId = context.Users.FirstOrDefault(u => u.UserName == "jason").Id,
+        //            BookingId = context.Bookings.FirstOrDefault(b => b.BookingId == 1).BookingId
+        //        }
+        //    };
+
+        //    booking1.UserBookings = userBookings;
+
+        //    bookings.Add(booking1);
+
+        //    return bookings;
+        //}
     }
 }

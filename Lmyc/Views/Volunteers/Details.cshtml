@@ -1,8 +1,11 @@
 ﻿@model Lmyc.Models.Volunteer
+
 @{
     ViewData["Title"] = "Details";
 }
+
 <h2>Details</h2>
+
 <div>
     <h4>Volunteer</h4>
     <hr />
@@ -31,9 +34,15 @@
         <dd>
             @Html.DisplayFor(model => model.ClassificationCodes)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.User)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.User.UserName)
+        </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.VoluntterId">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.VolunteerId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

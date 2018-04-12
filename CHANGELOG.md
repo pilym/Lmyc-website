@@ -3,6 +3,34 @@ All notable changes to this project will be documented in this file.
 
 ##Team member: Castiel Li (CL) , Jason Chen (JC) , Harrison Milbradt (HM) , Mu Chen (Paul) Li (ML), Nate Chiang (NC)
 
+## [0.2.7]
+### 2018-04-11
+#### Added
+* Add policies on controllers that needed them such as Booking, Volunteer and Document - NC
+* Add Document Controller that adds, delete and view the file in the server - NC
+* Add Document Model that represents files that are uploaded to the server - NC
+* Add GET method that returns the user from a given username - NC
+* Add method to calculate Allocated hours - NC
+* Add GET method that get all members - JC
+
+### Changed
+* Changed the links to hide if not logged in - NC
+* Route for volunteer api to /VolunteersAPI - NC
+
+## [0.2.6]
+### 2018-04-10
+#### Added
+* Add volunteer Controller and API - NC
+* Add associative table UserBooking - JC
+* Add more users - JC
+* Add Booking API - JC
+* Modify Get Booking API - JC
+
+#### Changed
+* Fix volunteer model - JC
+* Re-migrate the database - JC
+* Fix booking model - JC
+
 ## [0.2.5]
 ### 2018-04-09
 #### Added
@@ -12,9 +40,12 @@ All notable changes to this project will be documented in this file.
 * Add member status to role - JC
 * Add skipper status to role - JC
 
+#### Changed
+
 #### Removed
 * Delete Member status - JC
 * Delete Skipper status - JC
+* Remove old migrations - JC
 
 ## [0.2.4]
 ### 2018-04-09
